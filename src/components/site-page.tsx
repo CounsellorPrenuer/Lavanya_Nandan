@@ -178,22 +178,17 @@ export function SitePage({ data }: { data: HomePageData }) {
     event.preventDefault();
     setFormLoading(true);
     setFormMessage("");
-
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formState),
-    });
-
-    const payload = await response.json();
-
-    if (!response.ok || !payload.ok) {
-      setFormMessage(payload.error || "Could not send message. Try again.");
-      setFormLoading(false);
-      return;
-    }
-
-    setFormMessage("Thank you. Your message has been submitted successfully.");
+    const to = data.email || "lavanyanandan61@gmail.com";
+    const subject = encodeURIComponent(
+      formState.subject || `Career Counselling Enquiry - ${formState.name}`,
+    );
+    const body = encodeURIComponent(
+      `Name: ${formState.name}\nEmail: ${formState.email}\nPhone: ${formState.phone}\n\nMessage:\n${formState.message}`,
+    );
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    setFormMessage(
+      "Opening your email app to send the enquiry. If it doesn't open, please contact directly via phone/WhatsApp.",
+    );
     setFormState({ name: "", email: "", phone: "", subject: "", message: "" });
     setFormLoading(false);
   }

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { SitePage, type HomePageData } from "@/components/site-page";
 import { client } from "@/sanity/lib/client";
 import { homePageQuery } from "@/sanity/lib/queries";
@@ -8,10 +11,22 @@ const fallbackData: HomePageData = {
   about: [],
 };
 
-export default async function Home() {
-  const data = await client.fetch<HomePageData | null>(homePageQuery, {}, {
-    next: { revalidate: 30 },
-  });
+export default function Home() {
+  const [data, setData] = useState<HomePageData>(fallbackData);
 
-  return <SitePage data={data || fallbackData} />;
+  useEffect(() => {
+    let mounted = true;
+    client
+      .fetch<HomePageData | null>(homePageQuery)
+      .then((res) => {
+        if (mounted && res) setData(res);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return <SitePage data={data} />;
 }
+
